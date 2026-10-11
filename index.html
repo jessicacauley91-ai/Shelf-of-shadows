@@ -1,0 +1,309 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#171014">
+<meta name="description" content="Shelf of Shadows — your personal book collection tracker">
+<link rel="manifest" href="manifest.json">
+<title>Shelf of Shadows</title>
+<style>
+:root{color-scheme:dark;--bg:#120d12;--panel:#211720;--panel2:#2c202a;--text:#f7edf4;--muted:#c6b4c2;--accent:#d85b91;--line:#4c3445}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at top,#35202f 0,#120d12 55%);font:16px system-ui,-apple-system,sans-serif;color:var(--text);min-height:100vh}
+header{padding:26px 18px 18px;max-width:900px;margin:auto} .eyebrow{letter-spacing:.18em;text-transform:uppercase;color:#e6a4c1;font-size:.75rem}
+h1{font-family:Georgia,serif;font-size:clamp(2rem,8vw,3.2rem);margin:.35rem 0}.subtitle{color:var(--muted);margin:0}
+main{max-width:900px;margin:auto;padding:0 16px 36px}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:16px 0}
+.stat,.card,.formbox{background:rgba(33,23,32,.94);border:1px solid var(--line);border-radius:16px;padding:14px}.stat strong{display:block;font-size:1.5rem}.stat span{font-size:.8rem;color:var(--muted)}
+.toolbar{display:flex;gap:8px;margin:18px 0;flex-wrap:wrap}input,select,button{font:inherit;border-radius:10px;padding:11px 12px;border:1px solid var(--line);background:#1b121a;color:var(--text)}input{min-width:0;flex:1}button{cursor:pointer;background:var(--accent);border-color:var(--accent);color:#210e19;font-weight:700}button.secondary{background:var(--panel2);color:var(--text);border-color:var(--line)}
+.formbox{margin:12px 0}.formgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.formgrid input,.formgrid select{width:100%}.formgrid .wide{grid-column:1/-1}
+h2{font-family:Georgia,serif;font-size:1.45rem}.books{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}.booktitle{font-family:Georgia,serif;font-size:1.15rem;font-weight:bold}.author{color:var(--muted);margin:4px 0 12px}.tag{display:inline-block;border:1px solid #79506a;color:#f0bfd4;border-radius:999px;padding:3px 8px;font-size:.75rem}.bookactions{display:flex;gap:7px;margin-top:12px}.bookactions button{font-size:.85rem;padding:8px 10px}.empty{color:var(--muted);padding:25px;text-align:center;border:1px dashed var(--line);border-radius:14px}
+footer{text-align:center;color:var(--muted);font-size:.8rem;padding:22px}
+
+.lookupbox{background:rgba(33,23,32,.94);border:1px solid var(--line);border-radius:16px;padding:14px;margin:14px 0}
+.lookuprow{display:flex;gap:8px}.lookuprow input{min-width:0;flex:1}
+.lookupnote{font-size:.86rem;color:var(--muted);line-height:1.45}
+.lookupresults{display:grid;gap:10px;margin-top:12px}
+.lookupitem{display:flex;gap:12px;background:#1b121a;border:1px solid var(--line);border-radius:12px;padding:10px;align-items:flex-start}
+.lookupitem img{width:62px;height:88px;object-fit:cover;border-radius:6px;background:#382535}
+.lookupitem .meta{flex:1;min-width:0}.lookupitem .meta strong{display:block;font-family:Georgia,serif;font-size:1.02rem}
+.lookupitem .meta small{display:block;color:var(--muted);margin:4px 0 8px}
+.lookupitem button{font-size:.82rem;padding:8px 10px}
+@media(max-width:480px){.lookuprow{flex-direction:column}.lookuprow button{width:100%}}
+
+
+.series-controls{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.series-controls select{width:100%;min-width:0}
+.lookupitem .meta .series-label{color:#e6a4c1;font-size:.78rem;margin:0 0 7px}
+.notice{padding:10px 12px;border:1px solid #79506a;border-radius:10px;color:#f0bfd4;background:#211720;margin-top:10px;font-size:.88rem}
+@media(max-width:480px){.series-controls{grid-template-columns:1fr}}
+
+@media(max-width:480px){.formgrid{grid-template-columns:1fr}.formgrid .wide{grid-column:auto}.stats{gap:7px}.stat{padding:10px}.stat strong{font-size:1.25rem}}
+</style>
+</head>
+<body>
+<header><div class="eyebrow">A personal reading grimoire</div><h1>🖤 Shelf of Shadows</h1><p class="subtitle">Every book has a place. Every series has a story.</p></header>
+<main>
+<section class="stats">
+<div class="stat"><strong id="ownedCount">0</strong><span>Books owned</span></div>
+<div class="stat"><strong id="readCount">0</strong><span>Books read</span></div>
+<div class="stat"><strong id="seriesCount">0</strong><span>Series tracked</span></div>
+</section>
+<section class="formbox">
+<h2>Add a book</h2>
+<form id="bookForm" class="formgrid">
+<input id="title" class="wide" placeholder="Book title *" required>
+<input id="author" placeholder="Author">
+<input id="series" placeholder="Series name">
+<input id="number" type="number" min="1" placeholder="Book number">
+<select id="status"><option value="Owned">Owned</option><option value="Want to buy">Want to buy</option><option value="Reading">Currently reading</option><option value="Read">Read</option></select>
+<input id="format" placeholder="Format (paperback, ebook...)">
+<input id="isbn" class="wide" inputmode="numeric" placeholder="ISBN (optional)">
+<button class="wide" type="submit">Add to my shelf ✦</button>
+</form>
+<div class="toolbar" style="margin-bottom:0">
+<button type="button" id="scanButton">Scan barcode with camera 📷</button>
+<button type="button" id="isbnLookupButton" class="secondary">Look up ISBN</button>
+<button type="button" id="exportButton" class="secondary">Export backup</button>
+<button type="button" id="importButton" class="secondary">Import backup</button>
+<input id="importFile" type="file" accept="application/json,.json" hidden>
+</div>
+<div id="scanStatus" class="lookupnote" role="status" aria-live="polite">Barcode scanning requires a supported browser/device and camera permission. ISBN lookup requires internet.</div>
+<video id="scanVideo" playsinline muted hidden style="width:100%;max-height:280px;border-radius:12px;background:#000;margin-top:10px"></video>
+<button type="button" id="stopScanButton" class="secondary" hidden>Stop scanning</button>
+</section>
+
+<section class="lookupbox">
+<h2>Series completion check</h2>
+<p class="lookupnote">Shows progress for verified series we have reliable data for. For other series, we will not guess missing titles; verify the exact series and order first.</p>
+<div id="seriesProgress"></div>
+</section>
+
+<section class="lookupbox">
+<h2>Find books in an exact series</h2>
+<p class="lookupnote">Search for a series and review candidate books. Only catalog records that explicitly identify the series are treated as stronger matches; ambiguous titles are not presented as confirmed series entries. Catalog data can be incomplete, so verify the order before adding.</p>
+<div class="lookuprow">
+<input id="seriesLookup" placeholder="Exact series name (e.g. The Edge of Darkness)" aria-label="Exact series to look up">
+<button type="button" id="lookupButton">Find series books ✦</button>
+</div>
+<div id="lookupMessage" class="lookupnote" role="status" aria-live="polite"></div>
+<div id="lookupResults" class="lookupresults"></div>
+<hr style="border:0;border-top:1px solid var(--line);margin:18px 0">
+<h2>More books you might like</h2>
+<p class="lookupnote">Discover other books by an author separately, without mixing them into your series checklist.</p>
+<div class="lookuprow">
+<input id="authorLookup" placeholder="Author name (e.g. Leigh Rivers)" aria-label="Author for recommendations">
+<button type="button" id="authorLookupButton" class="secondary">Find more by author</button>
+</div>
+<div id="authorMessage" class="lookupnote" role="status" aria-live="polite"></div>
+<div id="authorResults" class="lookupresults"></div>
+</section>
+
+<div class="toolbar">
+<input id="search" placeholder="Search books or authors…" aria-label="Search books">
+<select id="filter" aria-label="Filter books"><option value="All">All books</option><option>Owned</option><option>Want to buy</option><option>Reading</option><option>Read</option></select>
+</div>
+<h2>Your collection</h2>
+<div id="books" class="books"></div>
+<footer>Your collection is saved on this device in this browser. Export backups regularly. Barcode scanning depends on browser support; cloud sync is not implemented yet.</footer>
+</main>
+<script>
+const key='shelf-of-shadows-books-v1';
+let books=[];
+try{books=JSON.parse(localStorage.getItem(key)||'[]')}catch(e){books=[]}
+const $=id=>document.getElementById(id);
+function save(){try{localStorage.setItem(key,JSON.stringify(books))}catch(e){} render()}
+function render(){
+ const q=$('search').value.toLowerCase(), f=$('filter').value;
+ $('ownedCount').textContent=books.filter(b=>b.status!=='Want to buy').length;
+ $('readCount').textContent=books.filter(b=>b.status==='Read').length;
+ $('seriesCount').textContent=new Set(books.map(b=>b.series.trim()).filter(Boolean)).size;
+ const list=books.filter(b=>(f==='All'||b.status===f)&&[b.title,b.author,b.series].join(' ').toLowerCase().includes(q));
+ $('books').innerHTML=list.length?list.map(b=>`<article class="card"><div class="booktitle">${esc(b.title)}</div><div class="author">${esc(b.author||'Author not added')}</div>${b.series?`<div>${esc(b.series)}${b.number?' · Book '+esc(b.number):''}</div>`:''}<p><span class="tag">${esc(b.status)}</span></p>${b.format?`<small>${esc(b.format)}</small>`:''}<div class="bookactions"><button class="secondary" data-toggle="${b.id}">${b.status==='Read'?'Mark unread':'Mark read'}</button><button class="secondary" data-delete="${b.id}">Remove</button></div></article>`).join(''):'<div class="empty">Your shelf is waiting for its first story. Add a book above. 🥀</div>';
+}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+$('bookForm').addEventListener('submit',e=>{e.preventDefault();books.unshift({id:Date.now().toString(),title:$('title').value.trim(),author:$('author').value.trim(),series:$('series').value.trim(),number:$('number').value,status:$('status').value,format:$('format').value.trim(),isbn:cleanIsbn($('isbn').value)});e.target.reset();save()});
+$('search').addEventListener('input',render);$('filter').addEventListener('change',render);
+$('books').addEventListener('click',e=>{let t=e.target.dataset.toggle,d=e.target.dataset.delete;if(t){books=books.map(b=>b.id===t?{...b,status:b.status==='Read'?'Owned':'Read'}:b);save()}if(d){books=books.filter(b=>b.id!==d);save()}});
+
+function norm(s){return String(s||'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim()}
+function alreadyOwned(d){
+ return books.some(b=>norm(b.title)===norm(d.title) && (b.status==='Owned'||b.status==='Read'||b.status==='Reading'));
+}
+function renderCatalogResults(docs, resultsEl, messageEl, seriesName, mode){
+ resultsEl.innerHTML='';
+ if(!docs.length){
+   messageEl.textContent=mode==='series'?'No books could be verified as belonging to that exact series in this catalog. Try the full series name or verify the series from a publisher/author source.':'No catalog matches found for that author.';
+   if(mode==='series'){
+     const a=document.createElement('a');a.href='https://www.google.com/search?q='+encodeURIComponent('"'+seriesName+'" Leigh Rivers series reading order');a.target='_blank';a.rel='noopener';a.textContent='Check the exact series and reading order online';a.style.color='#f0bfd4';resultsEl.appendChild(a);
+   }
+   return;
+ }
+ messageEl.textContent=mode==='series'
+   ? 'These are series-search candidates. Check the source label and verify the order before adding.'
+   : 'Author discovery is separate from series tracking. Books already on your shelf are marked.';
+ docs.forEach(d=>{
+   const item=document.createElement('div');item.className='lookupitem';
+   const img=document.createElement('img');img.alt='Book cover';
+   img.src=d.cover_url||(d.cover_i?'https://covers.openlibrary.org/b/id/'+d.cover_i+'-M.jpg':'data:image/svg+xml,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="62" height="88"><rect width="100%" height="100%" fill="#382535"/><text x="50%" y="50%" fill="#f0bfd4" font-size="10" text-anchor="middle">No cover</text></svg>'));
+   img.onerror=()=>{img.style.display='none'};
+   const meta=document.createElement('div');meta.className='meta';
+   const title=document.createElement('strong');title.textContent=d.title;
+   const small=document.createElement('small');small.textContent=((d.author_name||[]).slice(0,2).join(', ')||'Author unknown')+(d.first_publish_year?' · '+d.first_publish_year:'');
+   const label=document.createElement('div');label.className='series-label';
+   label.textContent=mode==='series'?(d.sourceLabel||'Possible match — verify series membership'):'Author recommendation';
+   const isOwned=alreadyOwned(d);
+   const status=document.createElement('div');status.className='lookupnote';
+   status.textContent=isOwned?'Already in your collection':'Not currently in your collection';
+   meta.append(title,small,label,status);
+   if(mode==='series'){
+     const controls=document.createElement('div');controls.className='series-controls';
+     const number=document.createElement('input');number.type='number';number.min='1';number.placeholder='Book number (if known)';number.setAttribute('aria-label','Book number');
+     const statusSelect=document.createElement('select');statusSelect.innerHTML='<option value="Want to buy">Want to buy</option><option value="Owned">Owned</option><option value="Read">Read</option><option value="Reading">Reading</option>';
+     const add=document.createElement('button');add.type='button';add.textContent=isOwned?'Already owned':'Add to series checklist';
+     add.disabled=isOwned;
+     add.addEventListener('click',()=>{
+       const existing=books.find(b=>norm(b.title)===norm(d.title));
+       if(existing){
+         existing.series=seriesName;
+         existing.number=number.value||existing.number||'';
+         if(statusSelect.value)existing.status=statusSelect.value;
+       }else{
+         books.unshift({id:Date.now().toString()+Math.random().toString(16).slice(2),title:d.title,author:(d.author_name||[])[0]||'',series:seriesName,number:number.value||'',status:statusSelect.value,format:'',catalogKey:d.key||''});
+       }
+       save();add.textContent='Added ✓';add.disabled=true;status.textContent='Added to your collection';
+     });
+     controls.append(number,statusSelect);meta.append(controls,add);
+   }else{
+     const add=document.createElement('button');add.type='button';add.textContent=isOwned?'Already on your shelf':'Add to wishlist';add.disabled=isOwned;
+     add.addEventListener('click',()=>{
+       books.unshift({id:Date.now().toString()+Math.random().toString(16).slice(2),title:d.title,author:(d.author_name||[])[0]||'',series:'',number:'',status:'Want to buy',format:'',catalogKey:d.key||''});
+       save();add.textContent='Added ✓';add.disabled=true;status.textContent='Added to wishlist';
+     });
+     meta.append(add);
+   }
+   item.append(img,meta);resultsEl.appendChild(item);
+ });
+}
+const lookupBtn=$('lookupButton');
+function curatedSeriesMatch(seriesName){
+ const n=norm(seriesName);
+ if(n.includes('edge of darkness')) return [
+  {title:'Insatiable',author_name:['Leigh Rivers'],first_publish_year:2023,seriesNumber:1,sourceLabel:'Verified series entry · Book 1'},
+  {title:'Voracious',author_name:['Leigh Rivers'],first_publish_year:2023,seriesNumber:2,sourceLabel:'Verified series entry · Book 2'},
+  {title:'Restitution',author_name:['Leigh Rivers'],first_publish_year:2024,seriesNumber:3,sourceLabel:'Verified series entry · Book 3'}
+ ];
+ return null;
+}
+lookupBtn.addEventListener('click', async ()=>{
+ const seriesName=$('seriesLookup').value.trim();
+ const resultsEl=$('lookupResults'), messageEl=$('lookupMessage');
+ resultsEl.innerHTML='';
+ if(!seriesName){messageEl.textContent='Enter the exact series name first.';return}
+ messageEl.textContent='Checking multiple book catalogs…';
+ lookupBtn.disabled=true; lookupBtn.textContent='Searching…';
+ try{
+   const curated=curatedSeriesMatch(seriesName);
+   if(curated){
+     messageEl.textContent='Found the three main books in The Edge of Darkness Trilogy. Psychotic Obsession is a related prequel, not one of the trilogy’s three main books.';
+     renderCatalogResults(curated,resultsEl,messageEl,seriesName,'series');
+     const note=document.createElement('p');note.className='lookupnote';
+     note.innerHTML='Cross-check the reading order with <a style="color:#f0bfd4" target="_blank" rel="noopener" href="https://penguinrandomhouselibrary.com/author/?authorid=2353079">Penguin Random House’s Leigh Rivers listings</a> and <a style="color:#f0bfd4" target="_blank" rel="noopener" href="https://www.goodreads.com/series/375718-the-edge-of-darkness-trilogy">the Goodreads series page</a>.';
+     resultsEl.appendChild(note);return;
+   }
+   const q=encodeURIComponent(seriesName);
+   const tasks=[
+    fetch('https://openlibrary.org/search.json?q='+q+'&fields=title,author_name,first_publish_year,cover_i,key,subject,series&limit=30').then(r=>{if(!r.ok)throw new Error('Open Library unavailable');return r.json()}),
+    fetch('https://www.googleapis.com/books/v1/volumes?q='+q+'&maxResults=20').then(r=>{if(!r.ok)throw new Error('Google Books unavailable');return r.json()})
+   ];
+   const settled=await Promise.allSettled(tasks);let candidates=[];
+   if(settled[0].status==='fulfilled'){
+    (settled[0].value.docs||[]).forEach(d=>{
+     const meta=norm((d.series||[]).join(' '));
+     const term=norm(seriesName).replace(/\b(the|series|trilogy|saga)\b/g,' ').replace(/\s+/g,' ').trim();
+     if(meta&&(meta===term||meta.includes(term)||term.includes(meta)))candidates.push({...d,sourceLabel:'Catalog lists this series'});
+     else candidates.push({...d,sourceLabel:'Possible match — verify series membership'});
+    });
+   }
+   if(settled[1].status==='fulfilled'){
+    (settled[1].value.items||[]).forEach(v=>{const vi=v.volumeInfo||{};if(vi.title)candidates.push({title:vi.title,author_name:vi.authors||[],first_publish_year:(vi.publishedDate||'').slice(0,4),cover_url:vi.imageLinks?.thumbnail||'',key:v.id,sourceLabel:'Google Books candidate — verify series membership'});});
+   }
+   const seen=new Set();candidates=candidates.filter(d=>{const k=norm(d.title);if(!k||seen.has(k))return false;seen.add(k);return true}).slice(0,20);
+   if(candidates.length){renderCatalogResults(candidates,resultsEl,messageEl,seriesName,'series');messageEl.textContent='Results combined from Open Library and Google Books. Candidates are not automatically confirmed as series entries; verify the reading order before adding.';const a=document.createElement('a');a.href='https://www.google.com/search?q='+encodeURIComponent('"'+seriesName+'" book series reading order');a.target='_blank';a.rel='noopener';a.textContent='Cross-check this series online';a.style.color='#f0bfd4';resultsEl.appendChild(a);}
+   else{messageEl.textContent='Neither catalog returned a confident series list. Search results can be incomplete, so we will not invent a reading order.';const a=document.createElement('a');a.href='https://www.google.com/search?q='+encodeURIComponent('"'+seriesName+'" book series reading order');a.target='_blank';a.rel='noopener';a.textContent='Search the exact series online';a.style.color='#f0bfd4';resultsEl.appendChild(a);}
+ }catch(err){messageEl.textContent='The catalogs could not be reached. Try again when you have an internet connection.';const a=document.createElement('a');a.href='https://www.google.com/search?q='+encodeURIComponent('"'+seriesName+'" book series reading order');a.target='_blank';a.rel='noopener';a.textContent='Verify this exact series online';a.style.color='#f0bfd4';resultsEl.appendChild(a);}
+ finally{lookupBtn.disabled=false;lookupBtn.textContent='Find series books ✦'}
+});
+$('seriesLookup').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();lookupBtn.click()}});
+$('authorLookupButton').addEventListener('click', async ()=>{
+ const author=$('authorLookup').value.trim(), resultsEl=$('authorResults'), messageEl=$('authorMessage'), btn=$('authorLookupButton');
+ resultsEl.innerHTML='';
+ if(!author){messageEl.textContent='Enter an author name first.';return}
+ messageEl.textContent='Looking for more books by '+author+'…';btn.disabled=true;btn.textContent='Searching…';
+ try{
+   const r=await fetch('https://openlibrary.org/search.json?author='+encodeURIComponent(author)+'&fields=title,author_name,first_publish_year,cover_i,key&limit=12');
+   if(!r.ok)throw new Error('Catalog request failed');
+   const data=await r.json();renderCatalogResults((data.docs||[]).slice(0,12),resultsEl,messageEl,'','author');
+ }catch(e){
+   messageEl.textContent='Catalog lookup is unavailable right now.';
+   const a=document.createElement('a');a.href='https://www.google.com/search?q='+encodeURIComponent('books by '+author);a.target='_blank';a.rel='noopener';a.textContent='Search for more books by this author';a.style.color='#f0bfd4';resultsEl.appendChild(a);
+ }finally{btn.disabled=false;btn.textContent='Find more by author'}
+});
+
+function cleanIsbn(v){return String(v||'').replace(/[^0-9Xx]/g,'').toUpperCase()}
+function progressRender(){
+ const el=$('seriesProgress'); if(!el)return;
+ const owned=books.filter(b=>['Owned','Read','Reading'].includes(b.status));
+ const known=[{name:'The Edge of Darkness Trilogy',entries:[['Insatiable',1],['Voracious',2],['Restitution',3]]}];
+ const rows=known.map(s=>{const found=s.entries.filter(([title])=>owned.some(b=>norm(b.title)===norm(title)));const missing=s.entries.filter(([title])=>!owned.some(b=>norm(b.title)===norm(title)));return `<article class="card"><strong>${esc(s.name)}</strong><p>${found.length} of ${s.entries.length} main books owned</p><div class="lookupnote">${missing.length?'Still needed: '+missing.map(x=>esc(x[0])).join(', '):'Main trilogy complete ✓'}</div></article>`});
+ const other=[...new Set(books.map(b=>b.series).filter(Boolean))].filter(n=>!known.some(k=>norm(k.name)===norm(n)));
+ other.forEach(name=>{const items=books.filter(b=>norm(b.series)===norm(name));rows.push(`<article class="card"><strong>${esc(name)}</strong><p>${items.length} book${items.length===1?'':'s'} recorded in your collection</p><div class="lookupnote">Missing books not calculated yet: series catalog and reading order need verification.</div></article>`)});
+ el.innerHTML=rows.length?rows.join(''):'<div class="empty">Add books with a series name to see tracked series here. Missing-book detection only appears when series data is verified.</div>';
+}
+const originalRender=render; render=function(){originalRender();progressRender()};
+$('exportButton').addEventListener('click',()=>{const blob=new Blob([JSON.stringify({app:'Shelf of Shadows',version:1,exportedAt:new Date().toISOString(),books},null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='shelf-of-shadows-backup-'+new Date().toISOString().slice(0,10)+'.json';a.click();URL.revokeObjectURL(url);$('scanStatus').textContent='Backup exported. Store it somewhere safe.'});
+$('importButton').addEventListener('click',()=>$('importFile').click());
+$('importFile').addEventListener('change',async e=>{const f=e.target.files[0];if(!f)return;try{const data=JSON.parse(await f.text());const incoming=Array.isArray(data)?data:data.books;if(!Array.isArray(incoming))throw new Error('Invalid backup');if(!confirm('Import '+incoming.length+' books? This replaces the current collection on this device. Export a backup first if needed.'))return;books=incoming.map((b,i)=>({...b,id:String(b.id||Date.now()+i),title:String(b.title||'').trim(),isbn:cleanIsbn(b.isbn)})).filter(b=>b.title);save();$('scanStatus').textContent='Backup imported: '+books.length+' books.'}catch(err){$('scanStatus').textContent='Could not import this backup. Choose a valid Shelf of Shadows JSON export.'}finally{e.target.value=''}});
+$('isbnLookupButton').addEventListener('click',async()=>{const isbn=cleanIsbn($('isbn').value);if(!isbn){$('scanStatus').textContent='Enter an ISBN in the ISBN field first.';return} $('scanStatus').textContent='Looking up ISBN…';try{const r=await fetch('https://www.googleapis.com/books/v1/volumes?q=isbn:'+encodeURIComponent(isbn)+'&maxResults=5');if(!r.ok)throw new Error();const d=await r.json(),v=(d.items||[])[0]?.volumeInfo;if(!v){$('scanStatus').textContent='No match found. Check the ISBN or enter the book manually.';return}$('title').value=v.title||'';$('author').value=(v.authors||[]).join(', ');$('isbn').value=isbn;$('scanStatus').textContent='Found a catalog match. Verify title and author, then add it to your shelf.'}catch(e){$('scanStatus').textContent='ISBN lookup failed. Check internet access and try again, or enter the book manually.'}});
+let scanStream=null,scanLoop=false, zxingControls=null;
+async function stopScanner(){scanLoop=false;if(zxingControls){try{zxingControls.stop()}catch(e){}zxingControls=null}if(scanStream){scanStream.getTracks().forEach(t=>t.stop());scanStream=null}const v=$('scanVideo');if(v.srcObject){v.srcObject=null}v.hidden=true;$('stopScanButton').hidden=true}
+$('stopScanButton').addEventListener('click',stopScanner);
+$('scanButton').addEventListener('click',async()=>{
+  $('scanStatus').textContent='Starting camera… If prompted, allow camera access. Keep the back of the book in good light.';
+  $('scanButton').disabled=true;
+  try {
+    if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) throw new Error('CAMERA_UNAVAILABLE');
+    if(!window.isSecureContext && location.hostname!=='localhost' && location.hostname!=='127.0.0.1') throw new Error('SECURE_CONTEXT');
+    const video=$('scanVideo');video.hidden=false;$('stopScanButton').hidden=false;
+    if('BarcodeDetector' in window){
+      let detector;
+      try{detector=new BarcodeDetector({formats:['ean_13','ean_8','upc_a','upc_e']})}catch(e){detector=null}
+      if(detector){
+        scanStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'}},audio:false});video.srcObject=scanStream;await video.play();scanLoop=true;$('scanStatus').textContent='Camera is on. Point it at the barcode on the back of your book.';
+        const tick=async()=>{if(!scanLoop)return;try{const codes=await detector.detect(video);if(codes.length){const code=cleanIsbn(codes[0].rawValue);if(code){$('isbn').value=code;await stopScanner();$('scanStatus').textContent='Barcode captured: '+code+'. Tap “Look up ISBN” and verify the title and author.';return}}}catch(e){}if(scanLoop)setTimeout(tick,150)};tick();return;
+      }
+    }
+    // Fallback for Android browsers without native BarcodeDetector.
+    $('scanStatus').textContent='Loading compatible barcode scanner…';
+    const mod=await import('https://esm.sh/@zxing/browser@0.1.5');
+    const Reader=mod.BrowserMultiFormatReader;
+    if(!Reader)throw new Error('SCANNER_LIBRARY');
+    const reader=new Reader();
+    $('scanStatus').textContent='Starting camera…';
+    zxingControls=await reader.decodeFromVideoDevice(undefined,video,(result,err,controls)=>{
+      if(result && scanLoop){const code=cleanIsbn(result.getText());if(code){scanLoop=false;$('isbn').value=code;try{controls.stop()}catch(e){}zxingControls=null;stopScanner();$('scanStatus').textContent='Barcode captured: '+code+'. Tap “Look up ISBN” and verify the title and author.'}}
+    });
+    scanLoop=true;$('scanStatus').textContent='Camera is on. Point it at the barcode on the back of your book.';
+  }catch(e){
+    await stopScanner();
+    if(e && e.message==='SECURE_CONTEXT')$('scanStatus').textContent='Camera access requires a secure website (HTTPS) or localhost. A downloaded HTML file will not work for camera scanning.';
+    else if(e && (e.name==='NotAllowedError'||e.name==='PermissionDeniedError'))$('scanStatus').textContent='Camera permission was denied. In Chrome, tap the site icon beside the address bar, allow Camera, then try again.';
+    else if(e && (e.name==='NotFoundError'||e.name==='DevicesNotFoundError'))$('scanStatus').textContent='No camera was found. You can type the ISBN manually instead.';
+    else if(e && e.message==='SCANNER_LIBRARY')$('scanStatus').textContent='The compatible scanner could not load. Check your internet connection and try again, or type the ISBN manually.';
+    else $('scanStatus').textContent='Could not start scanning ('+((e&&e.name)||'camera error')+'). Use Chrome on Android over HTTPS, allow camera access, and try again. You can also type the ISBN manually.';
+  }finally{$('scanButton').disabled=false}
+});
+
+ if('serviceWorker' in navigator && location.protocol.startsWith('http')) navigator.serviceWorker.register('./sw.js').catch(()=>{});
+render();
+</script>
+</body></html>

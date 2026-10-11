@@ -1,0 +1,13 @@
+{
+  "name": "Shelf of Shadows",
+  "short_name": "Shelf of Shadows",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#120d12",
+  "theme_color": "#171014",
+  "description": "A gothic book collection and series tracker.",
+  "icons": [
+    {"src":"icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}
+  ]
+}
